@@ -5,32 +5,32 @@ namespace OrderService.Models.User;
 
 public class UserDataFormatInfo
 {
-    private Stack<DataFormatType> _userProfiles = new();
+    private Queue<DataFormatType> _userProfiles = new();
 
     public UserDataFormatInfo()
     {
-        IReadOnlyCollection<DataFormatType> userProfiles = new Stack<DataFormatType>();
+        IReadOnlyCollection<DataFormatType> userProfiles = new Queue<DataFormatType>();
     }
     public string Username { get; init; }
     
     public IReadOnlyCollection<DataFormatType> DataFormats 
     {
         get => _userProfiles;
-        set => _userProfiles = value as Stack<DataFormatType> ?? new();
+        set => _userProfiles = value as Queue<DataFormatType> ?? new();
     }
 
     public void AddDataFormat(DataFormatType dataFormat)
     {
-        var userProfiles = new Stack<DataFormatType>();
-
+        var userProfiles = new Queue<DataFormatType>();
+        userProfiles.Enqueue(dataFormat);
+        
         foreach (var userProfile in _userProfiles)
         {
             if(userProfile == dataFormat) continue;
             
-            userProfiles.Push(userProfile);
+            userProfiles.Enqueue(userProfile);
         }
         
-        userProfiles.Push(dataFormat);
         _userProfiles = userProfiles;
     }
 }
