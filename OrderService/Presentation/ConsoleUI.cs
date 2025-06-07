@@ -65,7 +65,7 @@ public static class ConsoleUI
 
         for (int i = 0; i < orders.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {orders[i]}"); 
+            Console.WriteLine(orders[i].Print(i)); 
         }
         
         Pause();

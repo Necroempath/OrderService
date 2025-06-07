@@ -17,7 +17,8 @@ public class OrderBuilder : IBuilder
     private string? _name;
 
     private readonly List<Service> _services = new();
-    
+
+
     public IReadOnlyList<string> Prompts => ["Enter order name: "];
     
     public void AddService(Service service) => _services.Add(service);
@@ -38,7 +39,7 @@ public class OrderBuilder : IBuilder
 
         if (string.IsNullOrEmpty(_name))
         {
-            message = "Service name is empty";
+            message = "Order name is empty";
             return BuildingReport.MissingName;
         }
 

@@ -5,18 +5,18 @@ namespace OrderService.Services;
 
 class AuthService(IDataRepository<List<UserCredentials>> repository, ICredentialValidator credentialValidator)
 {
-    private List<UserCredentials> _usersCredentials = repository.LoadData()!;
-    
+    private readonly List<UserCredentials> _usersCredentials = repository.LoadData()!;
+
     public UserProfile? Register(string username, string password, out RegistrationReport report, out string message)
     {
         report = credentialValidator.Validate(username, password, _usersCredentials, out message);
         
         if (report == RegistrationReport.ValidCredentials)
-        {   
+        {
             string salt = Hasher.GenerateSalt();
             string hashedPassword = Hasher.HashPassword(password, salt);
             
-            _usersCredentials.Add(new UserCredentials {Username = username, HashPassword = hashedPassword, Salt = salt });
+            _usersCredentials.Add(new UserCredentials { Username = username, HashPassword = hashedPassword, Salt = salt });
             repository.SaveData(_usersCredentials);
 
             return new UserProfile { Username = username };
@@ -57,5 +57,4 @@ class AuthService(IDataRepository<List<UserCredentials>> repository, ICredential
     {
         return _usersCredentials.Count == 0;
     }
-
 }

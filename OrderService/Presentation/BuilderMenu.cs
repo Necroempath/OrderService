@@ -2,7 +2,7 @@ using OrderService.Builders;
 
 namespace OrderService.Presentation;
 
-public static class MenuBuilder
+public static class BuilderMenu
 {
     public static void Run(IBuilder builder)
     {
@@ -10,7 +10,7 @@ public static class MenuBuilder
         
         for (int i = 0; i < builder.Prompts.Count; i++)
         {
-            Console.WriteLine(builder.Prompts[i]);
+            Console.Write(builder.Prompts[i]);
             inputs[i] = Console.ReadLine()!;
         }
         

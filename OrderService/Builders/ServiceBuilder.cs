@@ -15,7 +15,7 @@ public class ServiceBuilder : IBuilder
     private string _description = "";
     private float? _price;
     
-    public IReadOnlyList<string> Prompts => 
+    public IReadOnlyList<string> Prompts =>
     [
         "Enter service description: ",
         "Enter service price: "
@@ -52,6 +52,7 @@ public class ServiceBuilder : IBuilder
                 break;
         }
         
+        _isValid = true;
         return BuildingReport.ValidData;
     }
 

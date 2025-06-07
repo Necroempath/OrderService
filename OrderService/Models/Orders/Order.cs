@@ -15,18 +15,18 @@ namespace OrderService.Models.Orders
             set => _services = value as List<Service> ?? new ();
         }
 
-        public override string ToString()
+        public string Print(int index)
         {
             StringBuilder builder = new();
             
-            builder.AppendLine($"Order name: {Name}");
-            
-            foreach (Service service in _services)
+            builder.AppendLine($"{index + 1}. Order: {Name}");
+
+            for (int i = 0; i < _services.Count; i++)
             {
-                builder.AppendLine(service.ToString());
+                builder.AppendLine($"\t{index + 1}.{i + 1} Service: {_services[i].Description}\n\tPrice: {_services[i].Price}");
             }
-            builder.AppendLine($"Order time: {OrderTime}");
             
+            builder.AppendLine($"Order time: {OrderTime}");
             return builder.ToString();
         }
     }

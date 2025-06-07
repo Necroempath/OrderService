@@ -15,7 +15,8 @@ class App
 {
     private readonly PathProvider _paths;
     private readonly AuthService _authService;
-    private UserProfile? _loggedInUser;
+    private UserProfile? _loggedInUserProfile;
+    private UserDataFormatInfo? _loggedInUserDataFormatInfo;
     
     public App()
     {
@@ -32,87 +33,121 @@ class App
     {
         while (_authService.EmptyUsersCredentials())
         {
-            _loggedInUser = Registration();
+            _loggedInUserProfile = Registration();
         }
 
-        while (_loggedInUser is null)
+        while (_loggedInUserProfile is null)
         {
             if (Login()) return;
         }
-        
+
+        var metadataRepository = new JsonDataRepository<UserDataFormatInfo>(_paths.GetFormatInfoFile(_loggedInUserProfile.Username)!);
+        _loggedInUserDataFormatInfo = metadataRepository.LoadData()!;
+        if (_loggedInUserDataFormatInfo.DataFormatTypes.Count > 0)
+        {
+            _loggedInUserProfile = LoadUserProfile(_loggedInUserDataFormatInfo.DataFormatTypes.Peek());
+        }
+
         while (true)
         {
             switch (MenuManager.Manage(MainMenu.Options, MainMenu.Title))
             {
                 case MainMenu.OptionType.ShowOrders:
-                    ConsoleUI.ShowOrders(_loggedInUser!.Orders);
+                    ConsoleUI.ShowOrders(_loggedInUserProfile!.Orders);
                     break;
                 
                 case MainMenu.OptionType.AddOrder:
-                    if(BuildOrder() is { } order) _loggedInUser!.AddOrder(order);
+                    if(BuildOrder() is { } order) _loggedInUserProfile!.AddOrder(order);
                     break;
                 
                 case MainMenu.OptionType.SaveData:
                 {
-                    IDataRepository<UserProfile> profileRepository = null;
-                    IDataRepository <UserDataFormatInfo> metadataRepository = new JsonDataRepository<UserDataFormatInfo>($"user_metadata/{_loggedInUser.Username}/{_loggedInUser.Username}.json");
-                    UserDataFormatInfo userDataFormatInfo = metadataRepository.LoadData()!;
-                    DataFormatType formatType = DataFormatType.JsonFormatData;
-                    
-                    switch (string.Empty)
+                    var formatTypeNullable = MenuManager.Manage(FileSaveMenu.Options, FileSaveMenu.Title);
+                    if (formatTypeNullable is not { } formatType)
                     {
-
-                        case "1":
-                            profileRepository = new JsonDataRepository<UserProfile>($"user_profile_data/{_loggedInUser.Username}/{_loggedInUser.Username}.json");
-                            formatType = DataFormatType.JsonFormatData;
-                            break;
-                        case "2":
-                            profileRepository =
-                                new XmlDataRepository<UserProfile>($"user_profile_data/{_loggedInUser.Username}/{_loggedInUser.Username}.xml");
-                            formatType = DataFormatType.XmlFormatData;
-                            break;
-                        case "3":
-                            profileRepository =
-                                new JsonDataRepository<UserProfile>($"user_profile_data/{_loggedInUser.Username}/{_loggedInUser.Username}.dat");
-                            formatType = DataFormatType.BinaryFormatData;
-                            break;
+                        Console.WriteLine("Invalid input");
+                        break;
                     }
                     
-                    userDataFormatInfo.AddFormatType(formatType);
-                    metadataRepository.SaveData(userDataFormatInfo);
-                    profileRepository?.SaveData(_loggedInUser!);
-                    Console.WriteLine($"Data of user {_loggedInUser!.Username} has been successfully saved.");
+                    SaveUserProfile(formatType);
+                    
+                    _loggedInUserDataFormatInfo.AddFormatType(formatType);
+                    metadataRepository.SaveData(_loggedInUserDataFormatInfo);
+                    Console.WriteLine($"Data of user {_loggedInUserProfile!.Username} has been successfully saved.");
                     break;
                 }
                 case MainMenu.OptionType.LoadData:
                 {
-                    IDataRepository<UserDataFormatInfo> metadataRepository = new JsonDataRepository<UserDataFormatInfo>($"user_metadata/{_loggedInUser.Username}/{_loggedInUser.Username}.json");
+                   // IDataRepository<UserDataFormatInfo> metadataRepository = new JsonDataRepository<UserDataFormatInfo>($"user_metadata/{_loggedInUserProfile.Username}/{_loggedInUserProfile.Username}.json");
                     var dataLoadFormat = ConsoleUI.LoadFormatSelection(metadataRepository.LoadData().DataFormatTypes.ToList());
                     IDataRepository<UserProfile> profileRepository = null;
                     switch (dataLoadFormat)
                     {
                         case DataFormatType.JsonFormatData:
                             profileRepository =
-                                new JsonDataRepository<UserProfile>($"user_profile_data/{_loggedInUser.Username}/{_loggedInUser.Username}.json");
+                                new JsonDataRepository<UserProfile>($"user_profile_data/{_loggedInUserProfile.Username}/{_loggedInUserProfile.Username}.json");
                             break;
                         case DataFormatType.XmlFormatData:
                             profileRepository =
-                                new XmlDataRepository<UserProfile>($"user_profile_data/{_loggedInUser.Username}/{_loggedInUser.Username}.xml");
+                                new XmlDataRepository<UserProfile>($"user_profile_data/{_loggedInUserProfile.Username}/{_loggedInUserProfile.Username}.xml");
                             break;
                         case DataFormatType.BinaryFormatData:
                             profileRepository =
-                                new JsonDataRepository<UserProfile>($"user_profile_data/{_loggedInUser.Username}/{_loggedInUser.Username}.json");
+                                new JsonDataRepository<UserProfile>($"user_profile_data/{_loggedInUserProfile.Username}/{_loggedInUserProfile.Username}.json");
                             break;
                     }
 
-                    _loggedInUser = profileRepository?.LoadData();
+                    _loggedInUserProfile = profileRepository?.LoadData();
                     break;
                 }
                 case MainMenu.OptionType.SignOut:
-                    if (Login()) return;
+                    _loggedInUserProfile = null;
+                    
+                    while (_loggedInUserProfile is null)
+                    {
+                        if (Login()) return;
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Invalid option");
+                    ConsoleUI.Pause();
                     break;
             }
         }
+    }
+
+    private void SaveUserProfile(DataFormatType type)
+    {
+        switch (type)
+        {
+            case DataFormatType.JsonFormatData:
+                new JsonDataRepository<UserProfile>(_paths.GetProfileDataFile(_loggedInUserProfile!.Username, type)!).SaveData(_loggedInUserProfile!);
+                break;
+            case DataFormatType.XmlFormatData:
+                new XmlDataRepository<UserProfile>(_paths.GetProfileDataFile(_loggedInUserProfile!.Username, type)!).SaveData(_loggedInUserProfile!);
+                break;
+            case DataFormatType.BinaryFormatData:
+                break;
+        }
+    }
+
+    private UserProfile LoadUserProfile(DataFormatType type)
+    {
+        IDataRepository<UserProfile> profileRepository = null;
+        
+        switch (type)
+        {
+            case DataFormatType.JsonFormatData:
+                profileRepository = new JsonDataRepository<UserProfile>(_paths.GetProfileDataFolder(_loggedInUserProfile!.Username)!);
+                break;
+            case DataFormatType.XmlFormatData:
+                profileRepository = new XmlDataRepository<UserProfile>(_paths.GetProfileDataFolder(_loggedInUserProfile!.Username)!);
+                break;
+            // case DataFormatType.BinaryFormatData:
+            //     break;
+        }
+        
+        return profileRepository.LoadData()!;
     }
 
     private bool Login()
@@ -120,10 +155,10 @@ class App
         switch (MenuManager.Manage(LoginMenu.Options, LoginMenu.Title))
         {
             case LoginMenu.OptionType.SignIn:
-                _loggedInUser = Authorization();
+                _loggedInUserProfile = Authorization();
                 break;
             case LoginMenu.OptionType.SignUp:
-                _loggedInUser = Registration();
+                _loggedInUserProfile = Registration();
                 break;
             case LoginMenu.OptionType.Exit:
                 return true;
@@ -145,8 +180,11 @@ class App
       Console.WriteLine(message);
       ConsoleUI.Pause();
       
-      Directory.CreateDirectory(_paths.GetFormatInfo(_loggedInUser!.Username)!);
-      new JsonDataRepository<UserDataFormatInfo>(_paths.GetFormatInfo(_loggedInUser!.Username)!).SaveData(new UserDataFormatInfo { Username = _loggedInUser!.Username });
+      if(userProfile == null) return null;
+      
+      Directory.CreateDirectory(_paths.GetProfileDataFolder(username)!); 
+      Directory.CreateDirectory(_paths.GetFormatInfoFolder(username)!); 
+      new JsonDataRepository<UserDataFormatInfo>(_paths.GetFormatInfoFile(username)!).SaveData(new UserDataFormatInfo { Username = username });
       
       return userProfile;
     }
@@ -166,10 +204,11 @@ class App
     private static Service? BuildService()
     {
         ServiceBuilder serviceBuilder = new();
-        MenuBuilder.Run(serviceBuilder);
-        serviceBuilder.Validate(out string message);
+        BuilderMenu.Run(serviceBuilder);
+        var report = serviceBuilder.Validate(out string message);
 
         Console.WriteLine(message);
+        if(report != ServiceBuilder.BuildingReport.ValidData) ConsoleUI.Pause();
         
         return serviceBuilder.Build();
     }
@@ -180,16 +219,16 @@ class App
         
         do
         {
+            Console.Clear();
             if (BuildService() is not Service service) return null;
 
             orderBuilder.AddService(service);
-
-            orderBuilder.AddService(service);
+            
             Console.WriteLine("New service has been included. \n1. Add another one\n2. Continue");
 
         } while (Console.ReadLine() == "1");
         
-        MenuBuilder.Run(orderBuilder);
+        BuilderMenu.Run(orderBuilder);
 
         orderBuilder.Validate(out string message);
         

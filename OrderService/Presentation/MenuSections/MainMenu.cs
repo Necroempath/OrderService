@@ -14,7 +14,7 @@ public static class MainMenu
     }
 
     public static string Title => "|————— MAIN MENU —————|";
-    
+
     public static IReadOnlyList<(OptionType, string)> Options =>
     [
         (OptionType.ShowOrders, "Show Orders"),

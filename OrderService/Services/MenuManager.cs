@@ -7,6 +7,7 @@ public class MenuManager
 {
     public static TResult? Manage<TResult>(IReadOnlyList<(TResult, string)> options, string title) where TResult : struct, Enum
     {
+        Console.Clear();
         Console.WriteLine(title);
         Console.WriteLine();
 
