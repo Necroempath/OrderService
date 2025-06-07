@@ -1,8 +1,8 @@
-using OrderService.Models.User;
+using OrderService.Models.Users;
 
 namespace OrderService.Repositories;
 
-interface IDataRepository<T> where T : class
+public interface IDataRepository<T> where T : class
 {
     T? LoadData();
     void SaveData(T data);

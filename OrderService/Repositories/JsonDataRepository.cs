@@ -1,5 +1,5 @@
 using System.Text.Json;
-using OrderService.Models.User;
+using OrderService.Models.Users;
 
 namespace OrderService.Repositories;
 
@@ -18,7 +18,7 @@ class JsonDataRepository<T>(string fileName) : IDataRepository<T> where T : clas
 
     public void SaveData(T data)
     {
-        using FileStream file = new (fileName, FileMode.Open, FileAccess.Write);
+        using FileStream file = new (fileName, FileMode.OpenOrCreate, FileAccess.Write);
         using StreamWriter writer = new (file);
         writer.Write(JsonSerializer.Serialize(data, _jsonOptions));
     }

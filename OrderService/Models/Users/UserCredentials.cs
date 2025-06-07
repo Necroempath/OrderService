@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace OrderService.Models.User
+﻿namespace OrderService.Models.Users
 {
     public class UserCredentials
     {

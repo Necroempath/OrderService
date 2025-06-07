@@ -1,4 +1,4 @@
-using OrderService.Models.User;
+using OrderService.Models.Users;
 
 namespace OrderService.Services;
 

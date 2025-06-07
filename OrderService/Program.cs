@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using OrderService.Models.User;
-
-namespace OrderService
+﻿namespace OrderService
 {
     internal class Program
     {
