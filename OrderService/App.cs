@@ -18,7 +18,7 @@ class App
     private readonly AuthService _authService;
     private UserProfile? _loggedInUserProfile;
     private UserDataFormatInfo? _loggedInUserDataFormatInfo;
-    private JsonDataRepository<UserDataFormatInfo> metadataRepository;
+    private JsonDataRepository<UserDataFormatInfo> _metadataRepository;
     private ILogger _logger;
     
     public App()
@@ -29,6 +29,10 @@ class App
             .Build();
 
         _paths = new PathProvider(config);
+        if (!File.Exists(_paths.GetCredentialsFile()))
+        {
+            File.WriteAllText(_paths.GetCredentialsFile()!, "[]");
+        }
         _logger = new FileLogger();
         _authService = new AuthService(new JsonDataRepository<List<UserCredentials>>("usersCredentials.json"), new DefaultCredentialValidator(), _logger);
     }
@@ -81,14 +85,14 @@ class App
                     SaveUserProfile(formatType);
                     
                     _loggedInUserDataFormatInfo.AddFormatType(formatType);
-                    metadataRepository.SaveData(_loggedInUserDataFormatInfo);
+                    _metadataRepository.SaveData(_loggedInUserDataFormatInfo);
                     
                     break;
                 }
                 
                 case MainMenu.OptionType.LoadData:
                 {
-                    var availableDataFiles = metadataRepository.LoadData()!.DataFormatTypes;
+                    var availableDataFiles = _metadataRepository.LoadData()!.DataFormatTypes;
                     
                     if (availableDataFiles.Count == 0)
                     {
@@ -98,7 +102,7 @@ class App
                         break;
                     }
                     
-                    var dataLoadFormat = InputHandler.Handle(metadataRepository.LoadData()!.DataFormatTypes, ConsoleUI.LoadFormatSelection);
+                    var dataLoadFormat = InputHandler.Handle(_metadataRepository.LoadData()!.DataFormatTypes, ConsoleUI.LoadFormatSelection);
                     
                     if (dataLoadFormat is not { } loadType)
                     {
@@ -216,8 +220,8 @@ class App
         
         if(_loggedInUserProfile is null) return false;
         
-        metadataRepository =  new JsonDataRepository<UserDataFormatInfo>(_paths.GetFormatInfoFile(_loggedInUserProfile!.Username)!);
-        _loggedInUserDataFormatInfo = metadataRepository.LoadData()!;
+        _metadataRepository =  new JsonDataRepository<UserDataFormatInfo>(_paths.GetFormatInfoFile(_loggedInUserProfile!.Username)!);
+        _loggedInUserDataFormatInfo = _metadataRepository.LoadData()!;
         
         if (_loggedInUserDataFormatInfo.DataFormatTypes.Count > 0)
         {
