@@ -2,7 +2,7 @@ namespace OrderService.Repositories;
 
 public enum DataFormatType
 {
-    XmlFormatData,
-    JsonFormatData,
-    BinaryFormatData
+    JsonFile,
+    XmlFile,
+    BinaryFile
 }

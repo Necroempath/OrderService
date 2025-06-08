@@ -4,22 +4,17 @@ namespace OrderService.Models.Users;
 
 public class UserDataFormatInfo
 {
-
     public required string Username { get; init; }
 
-    public Queue<DataFormatType> DataFormatTypes { get; private set; } =  new();
+    public List<DataFormatType> DataFormatTypes { get; set; } = new();
 
     public void AddFormatType(DataFormatType formatType)
     {
-        Queue<DataFormatType> queue = new();
-        queue.Enqueue(formatType);
-        
-        foreach (var type in DataFormatTypes)
-        {
-            if(formatType == type) continue;
-            queue.Enqueue(type);
-        }
-        
-        DataFormatTypes = queue;
+        List<DataFormatType> list = new();
+        list.Add(formatType);
+
+        list.AddRange(DataFormatTypes.Where(type => formatType != type));
+
+        DataFormatTypes = list;
     }
 }

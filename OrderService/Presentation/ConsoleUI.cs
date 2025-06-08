@@ -12,34 +12,19 @@ public static class ConsoleUI
     }
     
    
-    public static DataFormatType? LoadFormatSelection(List<DataFormatType> dataFormatTypes)
+    public static string LoadFormatSelection(List<DataFormatType> dataFormatTypes)
     {
-        if (dataFormatTypes.Count == 0)
-        {
-            Console.WriteLine("No data has been saved for the current user yet.");
-            return null;
-        }
-
+        Console.Clear();
+        Console.WriteLine("|————— LOAD FROM —————|\n");
+        
         for (int i = 0; i < dataFormatTypes.Count; i++)
         {
             Console.WriteLine($"{i + 1}. {dataFormatTypes[i]}");
         }
+        
+        Console.Write("\nSelect the option by the appropriate number: ");
 
-        Console.Write("Choose option by corresponding digit: ");
-
-        if (int.TryParse(Console.ReadLine(), out int option))
-        {
-            if (option > 0 && option <= dataFormatTypes.Count)
-            {
-                return dataFormatTypes[option - 1];
-            }
-
-            Console.WriteLine("Invalid option.");
-            return null;
-        }
-
-        Console.WriteLine("Incorrect input.");
-        return null;
+        return Console.ReadLine()!;
     }
   
     public static (string, string) CredentialsInput(LogIn logIn)

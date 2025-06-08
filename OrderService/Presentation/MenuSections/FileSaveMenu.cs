@@ -8,8 +8,8 @@ public static class FileSaveMenu
     
     public static IReadOnlyList<(DataFormatType, string)> Options =>
     [
-        (DataFormatType.JsonFormatData, "Json file"),
-        (DataFormatType.BinaryFormatData, "Xml file"),
-        (DataFormatType.BinaryFormatData, "Binary file")
+        (DataFormatType.JsonFile, "Json file"),
+        (DataFormatType.XmlFile, "Xml file"),
+        (DataFormatType.BinaryFile, "Binary file")
     ];
 }

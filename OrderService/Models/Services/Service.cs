@@ -1,9 +1,14 @@
-﻿namespace OrderService.Models.Services
+﻿using MessagePack;
+
+namespace OrderService.Models.Services
 {
+    [MessagePackObject]
     public class Service
     {
-        public required string Description { get; init; }
-        public required float Price { get; init; }
+        [Key(0)]
+        public required string Description { get; set; }
+        [Key(1)]
+        public required float Price { get; set; }
 
         public override string ToString()
         {
@@ -14,4 +19,5 @@
                               
         }
     }
+
 }

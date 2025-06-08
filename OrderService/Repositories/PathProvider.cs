@@ -31,13 +31,13 @@ public class PathProvider(IConfiguration configuration)
         
         switch (dataFormat)
         {
-            case DataFormatType.JsonFormatData:
+            case DataFormatType.JsonFile:
                 fileName = username + ".json";
                 break;
-            case DataFormatType.XmlFormatData:
+            case DataFormatType.XmlFile:
                 fileName = username + ".xml";
                 break;
-            case DataFormatType.BinaryFormatData:
+            case DataFormatType.BinaryFile:
                 fileName = username + ".dat";
                 break;
         }
