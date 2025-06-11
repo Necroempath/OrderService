@@ -116,8 +116,9 @@ class App
                 }
                 
                 case MainMenu.OptionType.SignOut:
-                    _loggedInUserProfile = null;
                     _logger.LogInfo($"User {_loggedInUserProfile!.Username} signed out.");
+                    _loggedInUserProfile = null;
+                    
                     
                     while (_loggedInUserProfile is null)
                     {
